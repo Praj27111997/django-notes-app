@@ -17,6 +17,7 @@ pipeline {
         stage("Build & Test"){
             steps{
                 sh "docker build . -t notes-app-jenkins:latest"
+                echo "aaj kuch tufani karte hai"
             }
         }
         stage("Push to DockerHub"){
