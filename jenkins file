@@ -1,0 +1,45 @@
+pipeline{
+    agent{
+        node{
+            label "dev"
+        }
+    }
+    
+    stages{
+        stage("Code "){
+            steps{
+                git url: "https://github.com/Praj27111997/django-notes-app.git", branch:"main"
+                echo "code clone huaa"
+            }
+        }
+        stage("Build & Test"){
+            steps{
+                sh "docker build . -t notes-app-v1:latest"
+                echo "build kiya"
+            }
+        }
+        stage("Push to dockerhub "){
+            steps{
+                echo "Push kar diya "
+                withCredentials(
+                    [usernamePassword(
+                        credentialsId:"dockerCreds",
+                        passwordVariable:"dockerHubPass",
+                        usernameVariable:"dockerHubUser" 
+                        )
+                    ]
+                ){
+                    sh "docker image tag notes-app-v1:latest ${env.dockerHubUser}/notes-app-v1:latest"
+                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                    sh "docker push ${env.dockerHubUser}/notes-app-v1:latest"
+                }
+            }
+        }
+        stage("Deloy "){
+              steps{
+               sh "docker compose down && docker compose up -d"
+               echo "deploy huaa"
+           }
+        }
+    }
+}
